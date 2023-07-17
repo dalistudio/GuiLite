@@ -9,43 +9,43 @@ class c_surface;
 
 typedef enum
 {
-	ATTR_VISIBLE	= 0x40000000L,
-	ATTR_FOCUS		= 0x20000000L,
-	ATTR_PRIORITY	= 0x10000000L// Handle touch action at high priority
-}WND_ATTRIBUTION;
+	ATTR_VISIBLE	= 0x40000000L, // 窗体可见
+	ATTR_FOCUS		= 0x20000000L, // 窗体焦点
+	ATTR_PRIORITY	= 0x10000000L// 以高优先级处理触摸动作 ，Handle touch action at high priority
+}WND_ATTRIBUTION; // 窗体属性
 
 typedef enum
 {
-	STATUS_NORMAL,
-	STATUS_PUSHED,
-	STATUS_FOCUSED,
-	STATUS_DISABLED
-}WND_STATUS;
+	STATUS_NORMAL, // 标准状态
+	STATUS_PUSHED, // 忙碌状态
+	STATUS_FOCUSED, // 聚焦状态
+	STATUS_DISABLED // 不可用状态
+}WND_STATUS; // 窗体状态
 
 typedef enum
 {
-	NAV_FORWARD,
-	NAV_BACKWARD,
-	NAV_ENTER
-}NAVIGATION_KEY;
+	NAV_FORWARD, // 向前
+	NAV_BACKWARD, // 向后 
+	NAV_ENTER // 回车
+}NAVIGATION_KEY; // 导航键
 
 typedef enum
 {
-	TOUCH_DOWN,
-	TOUCH_UP
-}TOUCH_ACTION;
+	TOUCH_DOWN, // 触摸按下
+	TOUCH_UP // 触摸松开
+}TOUCH_ACTION; // 触摸动作
 
 typedef struct struct_wnd_tree
 {
-	c_wnd*					p_wnd;//window instance
-	unsigned int			resource_id;//ID
-	const char*				str;//caption
-	short   				x;//position x
-	short   				y;//position y
-	short   				width;
-	short        			height;
-	struct struct_wnd_tree*	p_child_tree;//sub tree
-}WND_TREE;
+	c_wnd*					p_wnd;// 窗体实例 ，window instance
+	unsigned int			resource_id;//资源编号 ，ID
+	const char*				str;// 窗体标题， caption
+	short   				x;// 坐标X ，position x
+	short   				y;// 坐标Y ，position y
+	short   				width; // 宽度
+	short        			height; // 高度
+	struct struct_wnd_tree*	p_child_tree;// 子树，sub tree
+}WND_TREE; // 窗体树
 
 typedef void (c_wnd::*WND_CALLBACK)(int, int);
 
@@ -55,6 +55,8 @@ public:
 	c_wnd() : m_status(STATUS_NORMAL), m_attr((WND_ATTRIBUTION)(ATTR_VISIBLE | ATTR_FOCUS)), m_parent(0), m_top_child(0), m_prev_sibling(0), m_next_sibling(0),
 		m_str(0), m_font_color(0), m_bg_color(0), m_id(0), m_z_order(Z_ORDER_LEVEL_0), m_focus_child(0), m_surface(0) {};
 	virtual ~c_wnd() {};
+
+	// 连接
 	virtual int connect(c_wnd *parent, unsigned short resource_id, const char* str,
 		short x, short y, short width, short height, WND_TREE* p_child_tree = 0)
 	{
@@ -100,6 +102,7 @@ public:
 		return 0;
 	}
 
+	// 断开连接
 	void disconnect()
 	{
 		if (0 != m_top_child)
@@ -123,9 +126,9 @@ public:
 		m_attr = WND_ATTRIBUTION(0);
 	}
 
-	virtual void on_init_children() {}
-	virtual void on_paint() {}
-	virtual void show_window()
+	virtual void on_init_children() {} // 初始化子窗体时
+	virtual void on_paint() {} // 画窗体时
+	virtual void show_window() // 显示窗体
 	{
 		if (ATTR_VISIBLE == (m_attr & ATTR_VISIBLE))
 		{
@@ -142,8 +145,10 @@ public:
 		}
 	}
 
-	unsigned short get_id() const { return m_id; }
-	int get_z_order() { return m_z_order; }
+	unsigned short get_id() const { return m_id; } // 获取窗体编号
+	int get_z_order() { return m_z_order; } // 获取Z顺序
+
+	// 获取窗体指针
 	c_wnd* get_wnd_ptr(unsigned short id) const
 	{
 		c_wnd* child = m_top_child;
@@ -160,23 +165,24 @@ public:
 
 		return child;
 	}
-	unsigned int get_attr() const { return m_attr; }
+	unsigned int get_attr() const { return m_attr; } // 获取窗体属性
 
-	void set_str(const char* str) { m_str = str; }
-	void set_attr(WND_ATTRIBUTION attr) { m_attr = attr; }
-	bool is_focus_wnd() const
+	void set_str(const char* str) { m_str = str; } // 设置字符串
+	void set_attr(WND_ATTRIBUTION attr) { m_attr = attr; } // 设置窗体属性
+	bool is_focus_wnd() const // 是否聚焦窗体
 	{
 		return ((m_attr & ATTR_VISIBLE) && (m_attr & ATTR_FOCUS)) ? true : false;
 	}
 
-	void set_font_color(unsigned int color) { m_font_color = color; }
-	unsigned int get_font_color() { return m_font_color; }
-	void set_bg_color(unsigned int color) { m_bg_color = color; }
-	unsigned int get_bg_color() { return m_bg_color; }
-	void set_font_type(const LATTICE_FONT_INFO *font_type) { m_font = font_type; }
-	const void* get_font_type() { return m_font; }
-	void get_wnd_rect(c_rect &rect) const {	rect = m_wnd_rect; }
+	void set_font_color(unsigned int color) { m_font_color = color; } // 设置字体颜色
+	unsigned int get_font_color() { return m_font_color; } // 获取字体颜色
+	void set_bg_color(unsigned int color) { m_bg_color = color; } // 设置背景颜色
+	unsigned int get_bg_color() { return m_bg_color; } // 获取背景颜色
+	void set_font_type(const LATTICE_FONT_INFO *font_type) { m_font = font_type; } // 设置字体类型
+	const void* get_font_type() { return m_font; } // 获取字体类型
+	void get_wnd_rect(c_rect &rect) const {	rect = m_wnd_rect; } // 获取窗体矩形
 
+	// 获取屏幕矩形
 	void get_screen_rect(c_rect &rect) const
 	{
 		int l = 0;
@@ -184,7 +190,8 @@ public:
 		wnd2screen(l, t);
 		rect.set_rect(l, t, m_wnd_rect.width(), m_wnd_rect.height());
 	}
-
+ 
+	// 设置子窗体聚焦
 	c_wnd* set_child_focus(c_wnd *focus_child)
 	{
 		ASSERT(0 != focus_child);
@@ -206,7 +213,9 @@ public:
 		return m_focus_child;
 	}
 
-	c_wnd* get_parent() const { return m_parent; }
+	c_wnd* get_parent() const { return m_parent; } // 获取父窗体
+
+	// 获取最后的子窗体
 	c_wnd* get_last_child() const
 	{
 		if (0 == m_top_child)
@@ -223,6 +232,8 @@ public:
 
 		return child;
 	}
+
+	// 取消子窗体连接
 	int	unlink_child(c_wnd *child)
 	{
 		if ((0 == child)
@@ -285,9 +296,10 @@ public:
 			return 0;
 		}
 	}
-	c_wnd* get_prev_sibling() const { return m_prev_sibling; }
-	c_wnd* get_next_sibling() const { return m_next_sibling; }
+	c_wnd* get_prev_sibling() const { return m_prev_sibling; } // 获取前一个兄弟窗口（同级窗口）
+	c_wnd* get_next_sibling() const { return m_next_sibling; } // 获取下一个兄弟窗口
 
+	// 搜索兄弟窗口优先级
 	c_wnd* search_priority_sibling(c_wnd* root)
 	{
 		c_wnd* priority_wnd = 0;
@@ -304,6 +316,7 @@ public:
 		return priority_wnd;
 	}
 
+	// 触摸时
 	virtual void on_touch(int x, int y, TOUCH_ACTION action)
 	{
 		x -= m_wnd_rect.m_left;
@@ -330,6 +343,8 @@ public:
 			child = child->m_next_sibling;
 		}
 	}
+
+	// 导航时
 	virtual void on_navigate(NAVIGATION_KEY key)
 	{
 		c_wnd* priority_wnd = search_priority_sibling(m_top_child);
@@ -391,10 +406,12 @@ public:
 		}
 	}
 
-	c_surface* get_surface() { return m_surface; }
-	void set_surface(c_surface* surface) { m_surface = surface; }
+	c_surface* get_surface() { return m_surface; } // 获取表面
+	void set_surface(c_surface* surface) { m_surface = surface; } // 设置表面
 protected:
-	virtual void pre_create_wnd() {};
+	virtual void pre_create_wnd() {}; // 预创建窗体
+
+	// 添加子窗口到尾部
 	void add_child_2_tail(c_wnd *child)
 	{
 		if (0 == child)return;
@@ -419,6 +436,7 @@ protected:
 		}
 	}
 
+	// 窗体到屏幕
 	void wnd2screen(int &x, int &y) const
 	{
 		c_wnd* parent = m_parent;
@@ -437,6 +455,7 @@ protected:
 		}
 	}
 
+	// 加载子窗口
 	int load_child_wnd(WND_TREE *p_child_tree)
 	{
 		if (0 == p_child_tree)
@@ -454,10 +473,10 @@ protected:
 		}
 		return sum;
 	}
-	void set_active_child(c_wnd* child) { m_focus_child = child; }
+	void set_active_child(c_wnd* child) { m_focus_child = child; } // 设置激活子窗体
 
-	virtual void on_focus() {};
-	virtual void on_kill_focus() {};
+	virtual void on_focus() {}; // 聚焦时
+	virtual void on_kill_focus() {}; // 结束聚焦时
 protected:
 	unsigned short	m_id;
 	WND_STATUS		m_status;

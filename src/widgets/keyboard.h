@@ -10,8 +10,8 @@
 #include <string.h>
 
 //Changing key width/height will change the width/height of keyboard
-#define KEY_WIDTH          65
-#define KEY_HEIGHT         38
+#define KEY_WIDTH          65 // 键盘宽度
+#define KEY_HEIGHT         38 // 键盘高度
 
 #define KEYBOARD_WIDTH		((KEY_WIDTH + 2) * 10)
 #define KEYBOARD_HEIGHT		((KEY_HEIGHT + 2) * 4)
@@ -35,22 +35,22 @@
 
 typedef enum
 {
-	STATUS_UPPERCASE,
-	STATUS_LOWERCASE
-}KEYBOARD_STATUS;
+	STATUS_UPPERCASE, // 大写
+	STATUS_LOWERCASE  // 小写
+}KEYBOARD_STATUS; // 键盘状态
 
 typedef enum
 {
-	STYLE_ALL_BOARD,
+	STYLE_ALL_BOARD, 
 	STYLE_NUM_BOARD
-}KEYBOARD_STYLE;
+}KEYBOARD_STYLE; // 键盘样式
 
 typedef enum
 {
-	CLICK_CHAR,
-	CLICK_ENTER,
-	CLICK_ESC
-}CLICK_STATUS;
+	CLICK_CHAR, // 点击字符键
+	CLICK_ENTER, // 点击回车键
+	CLICK_ESC // 点击逃逸键
+}CLICK_STATUS; // 点击状态
 
 extern WND_TREE g_key_board_children[];
 extern WND_TREE g_number_board_children[];
@@ -58,6 +58,8 @@ class c_keyboard: public c_wnd
 {
 public:
 	c_keyboard() { m_attr = WND_ATTRIBUTION(0); }
+
+	// 打开键盘
 	int open_keyboard(c_wnd *user, unsigned short resource_id, KEYBOARD_STYLE style, WND_CALLBACK on_click)
 	{
 		c_rect user_rect;
@@ -86,12 +88,14 @@ public:
 		return 0;
 	}
 
+	// 关闭键盘
 	void close_keyboard()
 	{
 		c_wnd::disconnect();
 		m_surface->activate_layer(c_rect(), m_z_order);//inactivate the layer of keyboard by empty rect.
 	}
 	
+	// 初始化时
 	virtual void on_init_children()
 	{
 		c_wnd* child = m_top_child;
@@ -105,9 +109,12 @@ public:
 		}
 	}
 
+	// 获取大小写状态
 	KEYBOARD_STATUS get_cap_status(){return m_cap_status;}
 	char* get_str() { return m_str; }
 protected:
+
+	// 预创建窗体
 	virtual void pre_create_wnd()
 	{
 		m_attr = (WND_ATTRIBUTION)(ATTR_VISIBLE | ATTR_FOCUS | ATTR_PRIORITY);
@@ -116,6 +123,8 @@ protected:
 		memset(m_str, 0, sizeof(m_str));
 		m_str_len = 0;
 	}
+
+	// 绘画时
 	virtual void on_paint()
 	{
 		c_rect rect;
@@ -123,27 +132,30 @@ protected:
 		m_surface->fill_rect(rect, GL_RGB(0, 0, 0), m_z_order);
 	}
 
+	// 点击键时
 	void on_key_clicked(int id, int param)
 	{
 		switch (id)
 		{
 		case 0x14:
-			on_caps_clicked(id, param);
+			on_caps_clicked(id, param); // 大小写键
 			break;
 		case '\n':
-			on_enter_clicked(id, param);
+			on_enter_clicked(id, param); // 回车键
 			break;
 		case 0x1B:
-			on_esc_clicked(id, param);
+			on_esc_clicked(id, param); // 逃逸键
 			break;
 		case 0x7F:
-			on_del_clicked(id, param);
+			on_del_clicked(id, param); // 删除键
 			break;
 		default:
-			on_char_clicked(id, param);
+			on_char_clicked(id, param); // 字符键
 			break;
 		}
 	}
+
+	// 点击字符键时
 	void on_char_clicked(int id, int param)
 	{//id = char ascii code.
 		if (m_str_len >= sizeof(m_str))
@@ -169,6 +181,8 @@ protected:
 		m_str[m_str_len++] = id;
 		(m_parent->*(m_on_click))(m_id, CLICK_CHAR);
 	}
+
+	// 点击删除键时
 	void on_del_clicked(int id, int param)
 	{
 		if (m_str_len <= 0)
@@ -178,16 +192,22 @@ protected:
 		m_str[--m_str_len] = 0;
 		(m_parent->*(m_on_click))(m_id, CLICK_CHAR);
 	}
+
+	// 点击大小写键时
 	void on_caps_clicked(int id, int param)
 	{
 		m_cap_status = (m_cap_status == STATUS_LOWERCASE) ? STATUS_UPPERCASE : STATUS_LOWERCASE;
 		show_window();
 	}
+
+	// 点击回车键时
 	void on_enter_clicked(int id, int param)
 	{
 		memset(m_str, 0, sizeof(m_str));
 		(m_parent->*(m_on_click))(m_id, CLICK_ENTER);
 	}
+	
+	// 点击逃逸键时
 	void on_esc_clicked(int id, int param)
 	{
 		memset(m_str, 0, sizeof(m_str));
@@ -203,19 +223,20 @@ private:
 class c_keyboard_button : public c_button
 {
 protected:
+	// 绘画时
 	virtual void on_paint()
 	{
 		c_rect rect;
-		get_screen_rect(rect);
+		get_screen_rect(rect); // 获取屏幕矩形
 		switch (m_status)
 		{
-		case STATUS_NORMAL:
+		case STATUS_NORMAL: // 正常状态
 			m_surface->fill_rect(rect, c_theme::get_color(COLOR_WND_NORMAL), m_z_order);
 			break;
-		case STATUS_FOCUSED:
+		case STATUS_FOCUSED: // 聚焦状态
 			m_surface->fill_rect(rect, c_theme::get_color(COLOR_WND_FOCUS), m_z_order);
 			break;
-		case STATUS_PUSHED:
+		case STATUS_PUSHED: // 忙碌状态
 			m_surface->fill_rect(rect, c_theme::get_color(COLOR_WND_PUSHED), m_z_order);
 			m_surface->draw_rect(rect, c_theme::get_color(COLOR_WND_BORDER), 2, m_z_order);
 			break;

@@ -4,12 +4,13 @@
 #include "../core/resource.h"
 #include "../core/display.h"
 
-#define	DEFAULT_MASK_COLOR 0xFF080408
+#define	DEFAULT_MASK_COLOR 0xFF080408 // 默认掩码颜色
 class c_surface;
 
 class c_image_operator
 {
 public:
+	// 绘画图形
 	virtual void draw_image(c_surface* surface, int z_order, const void* image_info, int x, int y, unsigned int mask_rgb = DEFAULT_MASK_COLOR) = 0;
 	virtual void draw_image(c_surface* surface, int z_order, const void* image_info, int x, int y, int src_x, int src_y, int width, int height, unsigned int mask_rgb = DEFAULT_MASK_COLOR) = 0;
 };

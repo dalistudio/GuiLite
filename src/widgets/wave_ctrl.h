@@ -20,9 +20,9 @@
 
 typedef enum
 {
-	FILL_MODE,
-	SCAN_MODE
-}E_WAVE_DRAW_MODE;
+	FILL_MODE, // 填充模式
+	SCAN_MODE  // 扫描模式
+}E_WAVE_DRAW_MODE; // 波形绘制模式
 
 class c_wave_buffer;
 class c_wave_ctrl : public c_wnd

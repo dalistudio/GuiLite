@@ -23,12 +23,15 @@
 
 static void(*do_assert)(const char* file, int line);
 static void(*do_log_out)(const char* log);
+
+// 注册调试函数
 void register_debug_function(void(*my_assert)(const char* file, int line), void(*my_log_out)(const char* log))
 {
 	do_assert = my_assert;
 	do_log_out = my_log_out;
 }
 
+// 断言
 void _assert(const char* file, int line)
 {
 	if(do_assert)
@@ -41,6 +44,7 @@ void _assert(const char* file, int line)
 	} 
 }
 
+// 日志输出
 void log_out(const char* log)
 {
 	if (do_log_out)
@@ -54,22 +58,25 @@ void log_out(const char* log)
 	}
 }
 
+// 定义类型：定时器管理结构
 typedef struct _timer_manage
 {
+	// 定时器信息
     struct  _timer_info
     {
-        int state; /* on or off */
-        int interval;
-        int elapse; /* 0~interval */
-        void (* timer_proc) (void* param);
-		void* param;
+        int state; /* 状态：开或关 on or off */
+        int interval; /* 间隔 */
+        int elapse; /* 流逝时间 0~interval */
+        void (* timer_proc) (void* param); /* 定时器处理函数 */
+		void* param; /* 参数 */
     }timer_info[MAX_TIMER_CNT];
 
-    void (* old_sigfunc)(int);
-    void (* new_sigfunc)(int);
+    void (* old_sigfunc)(int); // 旧信号函数
+    void (* new_sigfunc)(int); // 新信号函数
 }_timer_manage_t;
-static struct _timer_manage timer_manage;
+static struct _timer_manage timer_manage; // 定时器管理
 
+// 定时器程序
 static void* timer_routine(void*)
 {
     int i;
@@ -93,6 +100,7 @@ static void* timer_routine(void*)
     return NULL;
 }
 
+// 初始化多定时器
 static int init_mul_timer()
 {
 	static bool s_is_init = false;
@@ -107,6 +115,7 @@ static int init_mul_timer()
     return 1;
 }
 
+// 设置定时器
 static int set_a_timer(int interval, void (* timer_proc)(void* param), void* param)
 {
 	init_mul_timer();
@@ -144,6 +153,7 @@ typedef void (*EXPIRE_ROUTINE)(void* arg);
 EXPIRE_ROUTINE s_expire_function;
 static c_fifo s_real_timer_fifo;
 
+// 实时定时器程序
 static void* real_timer_routine(void*)
 {
 	char dummy;
@@ -161,6 +171,7 @@ static void* real_timer_routine(void*)
 	return 0;
 }
 
+// 到期实时定时器
 static void expire_real_timer(int sigo)
 {
 	char dummy = 0x33;
@@ -170,6 +181,7 @@ static void expire_real_timer(int sigo)
 	}
 }
 
+// 开始实时定时器
 void start_real_timer(void (*func)(void* arg))
 {
 	if(NULL == func)
@@ -193,21 +205,25 @@ void start_real_timer(void (*func)(void* arg))
 	}
 }
 
+// 获得当前线程编号
 unsigned int get_cur_thread_id()
 {
 	return (unsigned long)pthread_self();
 }
 
+// 注册定时器
 void register_timer(int milli_second,void func(void* param), void* param)
 {
 	set_a_timer(milli_second/TIMER_UNIT,func, param);
 }
 
+// 以秒为单位，获得时间
 long get_time_in_second()
 {
 	return time(NULL);         /* + 8*60*60*/
 }
 
+// 获取时间
 T_TIME get_time()
 {
 	T_TIME ret = {0};
@@ -216,15 +232,16 @@ T_TIME get_time()
 
 	timer = get_time_in_second();
 	fmt = localtime(&timer);
-	ret.year   = fmt->tm_year + 1900;
-	ret.month  = fmt->tm_mon + 1;
-	ret.day    = fmt->tm_mday;
-	ret.hour   = fmt->tm_hour;
-	ret.minute = fmt->tm_min;
-	ret.second = fmt->tm_sec;
+	ret.year   = fmt->tm_year + 1900; // 年
+	ret.month  = fmt->tm_mon + 1; // 月
+	ret.day    = fmt->tm_mday; // 日
+	ret.hour   = fmt->tm_hour; // 时
+	ret.minute = fmt->tm_min; // 分
+	ret.second = fmt->tm_sec; // 秒
 	return ret;
 }
 
+// 以日为单位，将秒数转为日
 T_TIME second_to_day(long second)
 {
 	T_TIME ret = {0};
@@ -239,41 +256,44 @@ T_TIME second_to_day(long second)
 	return ret;
 }
 
+// 创建线程
 void create_thread(unsigned long* thread_id, void* attr, void *(*start_routine) (void *), void* arg)
 {
     pthread_create((pthread_t*)thread_id, (pthread_attr_t const*)attr, start_routine, arg);
 }
 
+// 线程休眠
 void thread_sleep(unsigned int milli_seconds)
 {
 	usleep(milli_seconds * 1000);
 }
 
 typedef struct {
-	unsigned short	bfType;
-	unsigned int   	bfSize;
-	unsigned short  bfReserved1;
-	unsigned short  bfReserved2;
-	unsigned int   	bfOffBits;
-}__attribute__((packed))FileHead;
+	unsigned short	bfType; // 类型
+	unsigned int   	bfSize; // 大小
+	unsigned short  bfReserved1; // 保留1
+	unsigned short  bfReserved2; // /保留2
+	unsigned int   	bfOffBits; // 偏移比特位
+}__attribute__((packed))FileHead; // 文件头
 
 typedef struct{
-	unsigned int  	biSize;
-	int 			biWidth;
-	int       		biHeight;
-	unsigned short	biPlanes;
-	unsigned short  biBitCount;
-	unsigned int    biCompress;
-	unsigned int    biSizeImage;
+	unsigned int  	biSize; // 大小
+	int 			biWidth; // 宽度
+	int       		biHeight; // 高度
+	unsigned short	biPlanes; // 
+	unsigned short  biBitCount; // 比特总数
+	unsigned int    biCompress; // 是否压缩
+	unsigned int    biSizeImage; // 图形大小
 	int       		biXPelsPerMeter;
 	int       		biYPelsPerMeter;
 	unsigned int 	biClrUsed;
 	unsigned int    biClrImportant;
-	unsigned int 	biRedMask;
-	unsigned int 	biGreenMask;
-	unsigned int 	biBlueMask;
-}__attribute__((packed))Infohead;
+	unsigned int 	biRedMask; // 红色掩码
+	unsigned int 	biGreenMask; // 绿色掩码
+	unsigned int 	biBlueMask; // 蓝色掩码
+}__attribute__((packed))Infohead; // 信息头
 
+// 构建位图
 int build_bmp(const char *filename, unsigned int width, unsigned int height, unsigned char *data)
 {
 	FileHead bmp_head;
@@ -324,6 +344,7 @@ int build_bmp(const char *filename, unsigned int width, unsigned int height, uns
 	return 0;
 }
 
+// 先入先出：初始化
 c_fifo::c_fifo()
 {
 	m_head = m_tail = 0;
@@ -334,6 +355,7 @@ c_fifo::c_fifo()
 	pthread_mutex_init((pthread_mutex_t*)m_write_mutex, 0);
 }
 
+// 先入先出：读取
 int c_fifo::read(void* buf, int len)
 {
 	unsigned char* pbuf = (unsigned char*)buf;
@@ -356,6 +378,7 @@ int c_fifo::read(void* buf, int len)
 	return i;
 }
 
+// 先入先出：写入
 int c_fifo::write(void* buf, int len)
 {
 	unsigned char* pbuf = (unsigned char*)buf;

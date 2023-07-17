@@ -8,10 +8,13 @@
 
 #define MAX_PAGES	5
 class c_gesture;
+
+// 幻灯片控件
 class c_slide_group : public c_wnd {
 public:
 	inline c_slide_group();
 
+	// 设置激活的幻灯片
 	int set_active_slide(int index, bool is_redraw = true)
 	{
 		if (index >= MAX_PAGES || index < 0)
@@ -48,9 +51,12 @@ public:
 		}
 		return 0;
 	}
-	c_wnd* get_slide(int index){return m_slides[index];}
-	c_wnd* get_active_slide(){return m_slides[m_active_slide_index];}
-	int get_active_slide_index(){return m_active_slide_index;}
+
+	c_wnd* get_slide(int index){return m_slides[index];} // 获取幻灯片
+	c_wnd* get_active_slide(){return m_slides[m_active_slide_index];} // 获取激活的幻灯片
+	int get_active_slide_index(){return m_active_slide_index;} // 获取激活的幻灯片索引
+
+	// 添加幻灯片
 	int add_slide(c_wnd* slide, unsigned short resource_id, short x, short y, short width, short height, WND_TREE* p_child_tree = 0, Z_ORDER_LEVEL max_zorder =  Z_ORDER_LEVEL_0)
 	{
 		if (0 == slide)
@@ -93,6 +99,8 @@ public:
 		ASSERT(false);
 		return -3;
 	}
+
+	// 禁用所有幻灯片
 	void disabel_all_slide()
 	{
 		for (int i = 0; i < MAX_PAGES; i++)
@@ -103,8 +111,8 @@ public:
 			}
 		}
 	}
-	inline virtual void on_touch(int x, int y, TOUCH_ACTION action);
-	virtual void on_navigate(NAVIGATION_KEY key)
+	inline virtual void on_touch(int x, int y, TOUCH_ACTION action); // 触摸时
+	virtual void on_navigate(NAVIGATION_KEY key) // 导航时
 	{
 		if (m_slides[m_active_slide_index])
 		{
@@ -129,15 +137,18 @@ typedef enum {
 class c_slide_group;
 class c_gesture {
 public:
+	// 手势
 	c_gesture(c_slide_group* group)
 	{
 		m_slide_group = group;
 		m_state = TOUCH_IDLE;
 		m_down_x = m_down_y = m_move_x = m_move_y = 0;
 	}
+
+	// 滑动处理程序
 	bool handle_swipe(int x, int y, TOUCH_ACTION action)
 	{
-		if (action == TOUCH_DOWN)//MOUSE_LBUTTONDOWN
+		if (action == TOUCH_DOWN)// 鼠标左键按下 MOUSE_LBUTTONDOWN
 		{
 			if (m_state == TOUCH_IDLE)
 			{
@@ -150,7 +161,7 @@ public:
 				return on_move(x);
 			}
 		}
-		else if (action == TOUCH_UP)//MOUSE_LBUTTONUP
+		else if (action == TOUCH_UP)// 鼠标左键松开 MOUSE_LBUTTONUP
 		{
 			if (m_state == TOUCH_MOVE)
 			{
@@ -167,6 +178,7 @@ public:
 	}
 
 private:
+	// 移动时
 	bool on_move(int x)
 	{
 		if (m_slide_group == 0)
@@ -190,6 +202,8 @@ private:
 		}
 		return false;
 	}
+
+	// 滑动时
 	bool on_swipe(int x)
 	{
 		if (m_slide_group == 0)
@@ -222,6 +236,8 @@ private:
 		}
 		return false;
 	}
+
+	// 向左滑动
 	int swipe_left()
 	{
 		if (m_slide_group == 0)
@@ -257,6 +273,7 @@ private:
 		return (index + 1);
 	}
 
+	// 向右滑动
 	int swipe_right()
 	{
 		if (m_slide_group == 0)
@@ -291,6 +308,8 @@ private:
 		}
 		return (index - 1);
 	}
+
+	// 左移动
 	void move_left()
 	{
 		int index = m_slide_group->get_active_slide_index();
@@ -309,6 +328,8 @@ private:
 			s1->get_display()->swipe_surface(s2, s1, rc.m_left, rc.m_right, rc.m_top, rc.m_bottom, (m_down_x - m_move_x));
 		}
 	}
+
+	// 右移动
 	void move_right()
 	{
 		int index = m_slide_group->get_active_slide_index();
@@ -336,6 +357,7 @@ private:
 	c_slide_group* m_slide_group;
 };
 
+// 幻灯片组
 inline c_slide_group::c_slide_group()
 {
 	m_gesture = new c_gesture(this);
@@ -346,6 +368,7 @@ inline c_slide_group::c_slide_group()
 	m_active_slide_index = 0;
 }
 
+// 触摸时
 inline void c_slide_group::on_touch(int x, int y, TOUCH_ACTION action)
 {
 	x -= m_wnd_rect.m_left;

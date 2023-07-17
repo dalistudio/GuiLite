@@ -7,33 +7,34 @@
 #include "../core/display.h"
 #include "../core/theme.h"
 
+// 窗体的按钮
 class c_button : public c_wnd
 {
 public:
-	void set_on_click(WND_CALLBACK on_click) { this->on_click = on_click; }
+	void set_on_click(WND_CALLBACK on_click) { this->on_click = on_click; } // 设置点击时
 protected:
-	virtual void on_paint()
+	virtual void on_paint() // 绘画时
 	{
 		c_rect rect;
-		get_screen_rect(rect);
+		get_screen_rect(rect); // 获取屏幕矩形
 
 		switch (m_status)
 		{
-		case STATUS_NORMAL:
+		case STATUS_NORMAL: // 标准状态
 			m_surface->fill_rect(rect, c_theme::get_color(COLOR_WND_NORMAL), m_z_order);
 			if (m_str)
 			{
 				c_word::draw_string_in_rect(m_surface, m_z_order, m_str, rect, m_font, m_font_color, c_theme::get_color(COLOR_WND_NORMAL), ALIGN_HCENTER | ALIGN_VCENTER);
 			}
 			break;
-		case STATUS_FOCUSED:
+		case STATUS_FOCUSED: // 聚焦状态
 			m_surface->fill_rect(rect, c_theme::get_color(COLOR_WND_FOCUS), m_z_order);
 			if (m_str)
 			{
 				c_word::draw_string_in_rect(m_surface, m_z_order, m_str, rect, m_font, m_font_color, c_theme::get_color(COLOR_WND_FOCUS), ALIGN_HCENTER | ALIGN_VCENTER);
 			}
 			break;
-		case STATUS_PUSHED:
+		case STATUS_PUSHED: // 忙碌状态
 			m_surface->fill_rect(rect, c_theme::get_color(COLOR_WND_PUSHED), m_z_order);
 			m_surface->draw_rect(rect, c_theme::get_color(COLOR_WND_BORDER), 2, m_z_order);
 			if (m_str)
@@ -46,16 +47,22 @@ protected:
 			break;
 		}
 	}
+
+	// 聚焦时
 	virtual void on_focus()
 	{
 		m_status = STATUS_FOCUSED;
 		on_paint();
 	}
+
+	// 结束聚焦时
 	virtual void on_kill_focus()
 	{
 		m_status = STATUS_NORMAL;
 		on_paint();
 	}
+
+	// 预创建窗体
 	virtual void pre_create_wnd()
 	{
 		on_click = 0;
@@ -64,6 +71,7 @@ protected:
 		m_font_color = c_theme::get_color(COLOR_WND_FONT);
 	}
 
+	// 触摸时
 	virtual void on_touch(int x, int y, TOUCH_ACTION action)
 	{
 		if (action == TOUCH_DOWN)
@@ -82,6 +90,8 @@ protected:
 			}
 		}
 	}
+	
+	// 导航时
 	virtual void on_navigate(NAVIGATION_KEY key)
 	{
 		switch (key)

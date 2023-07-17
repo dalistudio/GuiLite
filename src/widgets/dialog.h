@@ -12,13 +12,14 @@ class c_dialog;
 
 typedef struct
 {
-	c_dialog* 	dialog;
-	c_surface*	surface;
-} DIALOG_ARRAY;
+	c_dialog* 	dialog; // 对话框
+	c_surface*	surface; // 表面
+} DIALOG_ARRAY; // 对话框数组
 
 class c_dialog : public c_wnd
 {
 public:
+	// 打开对话框
 	static int open_dialog(c_dialog* p_dlg, bool modal_mode = true)
 	{
 		if (0 == p_dlg)
@@ -47,6 +48,7 @@ public:
 		return 1;
 	}
 
+	// 关闭对话框
 	static int close_dialog(c_surface* surface)
 	{
 		c_dialog* dlg = get_the_dialog(surface);
@@ -72,6 +74,7 @@ public:
 		return -1;
 	}
 
+	// 获取对话框
 	static c_dialog* get_the_dialog(c_surface* surface)
 	{
 		for (int i = 0; i < SURFACE_CNT_MAX; i++)
@@ -84,24 +87,29 @@ public:
 		return 0;
 	}
 protected:
+	// 预创建窗体
 	virtual void pre_create_wnd()
 	{
 		m_attr = WND_ATTRIBUTION(0);// no focus/visible
 		m_z_order = Z_ORDER_LEVEL_1;
 		m_bg_color = GL_RGB(33, 42, 53);
 	}
+
+	// 绘画时
 	virtual void on_paint()
 	{
 		c_rect rect;
-		get_screen_rect(rect);
-		m_surface->fill_rect(rect, m_bg_color, m_z_order);
+		get_screen_rect(rect); // 获取屏幕矩形
+		m_surface->fill_rect(rect, m_bg_color, m_z_order); // 填充矩形
 
 		if (m_str)
 		{
+			// 绘画字符串
 			c_word::draw_string(m_surface, m_z_order, m_str, rect.m_left + 35, rect.m_top, c_theme::get_font(FONT_DEFAULT), GL_RGB(255, 255, 255), GL_ARGB(0, 0, 0, 0));
 		}
 	}
 private:
+	// 设置对话框
 	int set_me_the_dialog()
 	{
 		c_surface* surface = get_surface();

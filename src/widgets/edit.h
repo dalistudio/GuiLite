@@ -13,11 +13,15 @@
 
 #define MAX_EDIT_STRLEN		32
 #define IDD_KEY_BOARD		0x1
+
+// 文本编辑框
 class c_edit : public c_wnd
 {
-	friend class c_keyboard;
+	friend class c_keyboard; // 键盘
 public:
-	const char* get_text(){return m_str;}
+	const char* get_text(){return m_str;} // 获得文本
+
+	// 设置文本
 	void set_text(const char* str)
 	{
 		if (str != 0 && strlen(str) < sizeof(m_str))
@@ -25,9 +29,12 @@ public:
 			strcpy(m_str, str);
 		}
 	}
+
+	// 设置键盘样式
 	void set_keyboard_style(KEYBOARD_STYLE kb_sytle) { m_kb_style = kb_sytle; }
 	
 protected:
+	// 预创建窗体
 	virtual void pre_create_wnd()
 	{
 		m_attr = (WND_ATTRIBUTION)(ATTR_VISIBLE | ATTR_FOCUS);
@@ -39,6 +46,8 @@ protected:
 		memset(m_str, 0, sizeof(m_str));
 		set_text(c_wnd::m_str);
 	}
+
+	// 绘画时
 	virtual void on_paint()
 	{
 		c_rect rect, kb_rect;
@@ -46,7 +55,7 @@ protected:
 		s_keyboard.get_screen_rect(kb_rect);
 		switch (m_status)
 		{
-		case STATUS_NORMAL:
+		case STATUS_NORMAL: // 正常状态
 			if ((s_keyboard.get_attr()&ATTR_VISIBLE) == ATTR_VISIBLE)
 			{
 				s_keyboard.close_keyboard();
@@ -55,7 +64,7 @@ protected:
 			m_surface->fill_rect(rect, c_theme::get_color(COLOR_WND_NORMAL), m_z_order);
 			c_word::draw_string_in_rect(m_surface, m_parent->get_z_order(), m_str, rect, m_font, m_font_color, c_theme::get_color(COLOR_WND_NORMAL), ALIGN_HCENTER | ALIGN_VCENTER);
 			break;
-		case STATUS_FOCUSED:
+		case STATUS_FOCUSED: // 聚焦状态
 			if ((s_keyboard.get_attr()&ATTR_VISIBLE) == ATTR_VISIBLE)
 			{
 				s_keyboard.close_keyboard();
@@ -64,7 +73,7 @@ protected:
 			m_surface->fill_rect(rect, c_theme::get_color(COLOR_WND_FOCUS), m_z_order);
 			c_word::draw_string_in_rect(m_surface, m_parent->get_z_order(), m_str, rect, m_font, m_font_color, c_theme::get_color(COLOR_WND_FOCUS), ALIGN_HCENTER | ALIGN_VCENTER);
 			break;
-		case STATUS_PUSHED:
+		case STATUS_PUSHED: // 忙碌状态
 			if ((s_keyboard.get_attr()&ATTR_VISIBLE) != ATTR_VISIBLE)
 			{
 				m_attr = (WND_ATTRIBUTION)(ATTR_VISIBLE | ATTR_FOCUS | ATTR_PRIORITY);
@@ -79,41 +88,51 @@ protected:
 			ASSERT(false);
 		}
 	}
+
+	// 聚焦时
 	virtual void on_focus()
 	{
 		m_status = STATUS_FOCUSED;
 		on_paint();
 	}
+
+	// 退出聚焦时
 	virtual void on_kill_focus()
 	{
 		m_status = STATUS_NORMAL;
 		on_paint();
 	}
+
+	// 导航时
 	virtual void on_navigate(NAVIGATION_KEY key)
 	{
 		switch (key)
 		{
-		case NAV_ENTER:
+		case NAV_ENTER: // 进入
 			(m_status == STATUS_PUSHED) ? s_keyboard.on_navigate(key) : (on_touch(m_wnd_rect.m_left, m_wnd_rect.m_top, TOUCH_DOWN), on_touch(m_wnd_rect.m_left, m_wnd_rect.m_top, TOUCH_UP));
 			return;
-		case NAV_BACKWARD:
-		case NAV_FORWARD:
+		case NAV_BACKWARD: // 后一个
+		case NAV_FORWARD:  // 前一个
 			return (m_status == STATUS_PUSHED) ? s_keyboard.on_navigate(key) : c_wnd::on_navigate(key);
 		}
 	}
+
+	// 触摸时
 	virtual void on_touch(int x, int y, TOUCH_ACTION action)
 	{
 		(action == TOUCH_DOWN) ? on_touch_down(x, y) : on_touch_up(x, y);
 	}	
+
+	// 键盘点击时
 	void on_key_board_click(int id, int param)
 	{
 		switch (param)
 		{
-		case CLICK_CHAR:
+		case CLICK_CHAR: // 点击字符
 			strcpy(m_str_input, s_keyboard.get_str());
 			on_paint();
 			break;
-		case CLICK_ENTER:
+		case CLICK_ENTER: // 点击回车
 			if (strlen(m_str_input))
 			{
 				memcpy(m_str, m_str_input, sizeof(m_str_input));
@@ -121,7 +140,7 @@ protected:
 			m_status = STATUS_FOCUSED;
 			on_paint();
 			break;
-		case CLICK_ESC:
+		case CLICK_ESC: // 点击退出
 			memset(m_str_input, 0, sizeof(m_str_input));
 			m_status = STATUS_FOCUSED;
 			on_paint();
@@ -132,6 +151,7 @@ protected:
 		}
 	}
 private:
+	// 触摸按下时
 	void on_touch_down(int x, int y)
 	{
 		c_rect kb_rect_relate_2_edit_parent;
@@ -161,6 +181,8 @@ private:
 			}
 		}
 	}
+
+	// 触摸松开时
 	void on_touch_up(int x, int y)
 	{
 		if (STATUS_FOCUSED == m_status)

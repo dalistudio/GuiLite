@@ -12,12 +12,14 @@
 #define MAX_ITEM_NUM			4
 #define ITEM_HEIGHT				45
 
+// 列表框
 class c_list_box : public c_wnd
 {
 public:
-	void set_on_change(WND_CALLBACK on_change) { this->on_change = on_change; }
-	short get_item_count() { return m_item_total; }
+	void set_on_change(WND_CALLBACK on_change) { this->on_change = on_change; } // 设置改变
+	short get_item_count() { return m_item_total; } // 获取项的数量
 
+	// 添加项
 	int add_item(char* str)
 	{
 		if (m_item_total >= MAX_ITEM_NUM)
@@ -29,12 +31,16 @@ public:
 		update_list_size();
 		return 0;
 	}
+
+	// 清理项
 	void clear_item()
 	{
 		m_selected_item = m_item_total = 0;
 		memset(m_item_array, 0, sizeof(m_item_array));
 		update_list_size();
 	}
+
+	// 选择项
 	void  select_item(short index)
 	{
 		if (index < 0 || index >= m_item_total)
@@ -45,6 +51,7 @@ public:
 	}
 	
 protected:
+	// 预创建窗体
 	virtual void pre_create_wnd()
 	{
 		m_attr = (WND_ATTRIBUTION)(ATTR_VISIBLE | ATTR_FOCUS);
@@ -55,6 +62,7 @@ protected:
 		m_font_color = c_theme::get_color(COLOR_WND_FONT);
 	}
 
+	// 绘画时
 	virtual void on_paint()
 	{
 		c_rect rect;
@@ -102,16 +110,22 @@ protected:
 			ASSERT(false);
 		}
 	}
+
+	// 聚焦时
 	virtual void on_focus()
 	{
 		m_status = STATUS_FOCUSED;
 		on_paint();
 	}
+
+	// 结束聚焦时
 	virtual void on_kill_focus()
 	{
 		m_status = STATUS_NORMAL;
 		on_paint();
 	}
+
+	// 导航时
 	virtual void on_navigate(NAVIGATION_KEY key)
 	{
 		switch (key)
@@ -143,12 +157,15 @@ protected:
 			return show_list();
 		}
 	}
+
+	// 触摸时
 	virtual void on_touch(int x, int y, TOUCH_ACTION action)
 	{
 		(action == TOUCH_DOWN) ? on_touch_down(x, y) : on_touch_up(x, y);
 	}
 	
 private:
+	// 更新列表大小
 	void update_list_size()
 	{
 		m_list_wnd_rect = m_wnd_rect;
@@ -159,6 +176,8 @@ private:
 		m_list_screen_rect.m_top = m_list_screen_rect.m_bottom + 1;
 		m_list_screen_rect.m_bottom = m_list_screen_rect.m_top + m_item_total * ITEM_HEIGHT;
 	}
+
+	// 显示列表
 	void show_list()
 	{
 		//draw all items
@@ -182,6 +201,8 @@ private:
 			}
 		}
 	}
+
+	// 触摸按下时
 	void on_touch_down(int x, int y)
 	{
 		if (m_wnd_rect.pt_in_rect(x, y))
@@ -208,6 +229,8 @@ private:
 			}
 		}
 	}
+
+	// 触摸松开时
 	void on_touch_up(int x, int y)
 	{
 		if (STATUS_FOCUSED == m_status)
